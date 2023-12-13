@@ -4,10 +4,11 @@ import * as THREE from 'three';
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
+import TWEEN, { Tween } from 'tween';
 
 
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000 );
+const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000 );
 
 const renderer = new THREE.WebGLRenderer({
   canvas: document.querySelector('#bg'),
@@ -16,9 +17,9 @@ const renderer = new THREE.WebGLRenderer({
 
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize( window.innerWidth, window.innerHeight);
-camera.position.setZ(30);
+camera.position.setZ(60);
 camera.position.setY(10);
-camera.position.setX(20);
+camera.position.setX(10);
 
 renderer.render(scene, camera)
 
@@ -104,12 +105,13 @@ const light3Helper = new THREE.PointLightHelper(light3);
 scene.add(light3Helper);*/
 
 // Nueva luz - Luz direccional
-const directionalLight = new THREE.DirectionalLight(0xFFA07A, 0.1);
-directionalLight.position.set(0, -1, 0);
-scene.add(directionalLight);
+//const directionalLight = new THREE.DirectionalLight(0xFFA07A, 0.1);
+//directionalLight.position.set(0, -1, 0);
+//scene.add(directionalLight);
 
 //control de camara
 const controls = new OrbitControls(camera, renderer.domElement);
+controls.enabled = false;
 
 /*// Crear un GridHelper
 // Los parámetros son (tamaño del grid, número de divisiones, color de las líneas principales, color de las líneas secundarias)
@@ -150,11 +152,26 @@ ciudades.position.z = -0.1;
 ciudades.position.setX(11);
 
 
+//posicion de la camara en las distintas paginas
+const pagesConfig = [
+  {id:"page0", cameraPosition: { x: 10, y: 10, z: 60 } },
+  {id:"page1", cameraPosition: { x: 80, y: -20, z: 20 } },
+  {id:"page2", cameraPosition: { x: -70, y: 50, z: 40 } },
+  {id:"page3", cameraPosition: { x: 10, y: -30, z: 10 } },
+  {id:"page4", cameraPosition: { x: 60, y: 10, z: 30 } },
+  {id:"page5", cameraPosition: { x: -10, y: 90, z: 5 } },
+];
 
-//funciones
+let currentPage = 0;
+
+
+
+//funciones///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function animate() {
   requestAnimationFrame(animate);
+
+  TWEEN.update();
 
   // Rotación continua del planeta
   planeta.rotation.y += 0.002;
@@ -168,16 +185,16 @@ function animate() {
 
 }
 
-function moveCamera() {
-  const t = document.body.getBoundingClientRect().top;
+//function moveCamera() {
+ // const t = document.body.getBoundingClientRect().top;
 
   // Ajustar la posición de la cámara basada en el scroll
-  camera.position.z = t * -0.01;
-  camera.position.x = t * -0.0002;
-  camera.position.y = t * -0.0002;
-}
+ // camera.position.z = t * -0.01;
+  //camera.position.x = t * -0.0002;
+ // camera.position.y = t * -0.0002;
+//}
 
-document.body.onscroll = moveCamera;
+//document.body.onscroll = moveCamera;
 
 function updateCityLightsIntensity() {
   const sunDirection = new THREE.Vector3().subVectors(sun.position, planeta.position).normalize();
@@ -191,11 +208,99 @@ function updateCityLightsIntensity() {
   ciudades.material.emissiveIntensity = (dot < 0) ? 3 : -1; 
 }
 
-function onDocumentClick(){
+//controladores de eventos UI
+
+showPageContent(0);
+
+document.getElementById('start-journey').addEventListener('click', function() {
+  this.style.display = 'none';
   sound.play();
+  currentPage = 1;
+  showPageContent(currentPage);
+  animateCameraToPosition(currentPage);
+  // Muestra los botones "Siguiente" y "Anterior"
+  document.getElementById('nav-next').style.display = 'block';
+  document.getElementById('nav-prev').style.display = 'block';
+});
+
+document.getElementById('nav-next').addEventListener('click', function() {
+  if (currentPage < pagesConfig.length - 1) {
+      currentPage++;
+      showPageContent(currentPage);
+      animateCameraToPosition(currentPage);
+  } else {
+      resetToStartJourney();
+      resetCameraToInitialPosition();
+  }
+});
+
+document.getElementById('nav-prev').addEventListener('click', function() {
+  if (currentPage > 0) {
+      currentPage--;
+      showPageContent(currentPage);
+      animateCameraToPosition(currentPage);
+  }
+});
+
+
+
+function resetToStartJourney() {
+  console.log("Resetting to start journey");
+  currentPage = 0;//resetea a page0
+  showPageContent(currentPage);//muestra page0
+  document.getElementById('nav-next').style.display = 'none';
+  document.getElementById('nav-prev').style.display = 'none';
+  sound.pause();
+  sound.currentTime = 0;
+  resetCameraToInitialPosition();
 }
-document.addEventListener('click', onDocumentClick);
+
+function showPageContent(pageNumber) {
+  console.log("Showing page:", pageNumber);
+  // Ocultar todas las páginas
+  const pages = document.querySelectorAll('.content-page');
+  pages.forEach(page => page.style.display = 'none');
+
+  // Mostrar la página actual
+  const currentPage = document.getElementById(`page${pageNumber}`);
+  if (currentPage) {
+      currentPage.style.display = 'block';
+      if (pageNumber === 0) {
+        document.getElementById('start-journey').style.display = 'block';
+      }
+  }
+}
+
+
+
+
+// animacion de transicion de movimiento a diferentes paginas
+function animateCameraToPosition(pageNumber) {
+  const position = pagesConfig[pageNumber].cameraPosition;
+  if (position) {
+      const tween = new TWEEN.Tween(camera.position)
+          .to(position, 2000)
+          .easing(TWEEN.Easing.Quadratic.Out)
+          .onUpdate(() => renderer.render(scene, camera))
+          .start();
+  }
+}
+
+
+function resetCameraToInitialPosition() {
+  const initialPosition = { x: 10, y: 10, z: 60}
+  const tween = new TWEEN.Tween(camera.position)
+  .to(initialPosition, 2000)
+  .easing(TWEEN.Easing.Quadratic.Out)
+  .onUpdate(() => renderer.render(scene, camera))
+  .start();
+}
 
 animate();
+
+
+
+
+
 
 

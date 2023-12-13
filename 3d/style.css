@@ -1,22 +1,44 @@
-canvas{
+canvas {
   position: fixed;
   top: 0;
   left: 0;
+  z-index: 1;
 }
 
-main {
-  width: 100vw;
-  color: azure;
-  z-index: 99;
+
+#start-journey {
   position: absolute;
-  width: 100%;
-  margin: 0px auto;
-  padding: 120px 0px;
-
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  
 }
 
+.content-page {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: none;
+  z-index: 2;
+  color: aliceblue;
+  font-weight: bold;
+}
 
+#nav-prev, #nav-next {
+  display: none; /*los botones estan ocultos inicialmente*/
+}
 
+#nav-prev {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  z-index: 10;
+}
+#nav-next {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 10;
+}
