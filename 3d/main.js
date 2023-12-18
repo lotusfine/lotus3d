@@ -17,9 +17,6 @@ const renderer = new THREE.WebGLRenderer({
 
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize( window.innerWidth, window.innerHeight);
-camera.position.setZ(60);
-camera.position.setY(10);
-camera.position.setX(10);
 
 renderer.render(scene, camera)
 
@@ -154,11 +151,11 @@ ciudades.position.setX(11);
 
 //posicion de la camara en las distintas paginas
 const pagesConfig = [
-  {id:"page0", cameraPosition: { x: 10, y: 10, z: 60 } },
-  {id:"page1", cameraPosition: { x: 80, y: -20, z: 20 } },
+  {id:"page0", cameraPosition: { x: 10, y: 10, z: 70 } },
+  {id:"page1", cameraPosition: { x: 35, y: 17, z: -10 } },
   {id:"page2", cameraPosition: { x: -70, y: 50, z: 40 } },
   {id:"page3", cameraPosition: { x: 10, y: -30, z: 10 } },
-  {id:"page4", cameraPosition: { x: 60, y: 10, z: 30 } },
+  {id:"page4", cameraPosition: { x: 60, y: 10, z: 10 } },
   {id:"page5", cameraPosition: { x: -10, y: 90, z: 5 } },
 ];
 
@@ -167,6 +164,18 @@ let currentPage = 0;
 
 
 //funciones///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+// Cuando cargas la página o reinicias, establece la posición inicial de la cámara
+function initializeOrResetCamera() {
+  const initialCameraPosition = pagesConfig[0].cameraPosition;
+  camera.position.set(initialCameraPosition.x, initialCameraPosition.y, initialCameraPosition.z);
+}
+
+// Llamar a esta función al cargar la página y al reiniciar a page0
+initializeOrResetCamera();
+
+
 
 function animate() {
   requestAnimationFrame(animate);
