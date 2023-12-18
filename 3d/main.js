@@ -130,16 +130,31 @@ const sound = new THREE.PositionalAudio(listener);
 // cargando un archivo de sonido
 const audioLoader = new THREE.AudioLoader();
 audioLoader.load('space.mp3', function(buffer) {
-  sound.setBuffer(buffer);
-  sound.setLoop(false);
-  sound.setVolume(0.2);
+    sound.setBuffer(buffer);
+    sound.setLoop(true);
+    sound.setVolume(0.2);
+    sound.setRefDistance(20);
+    sound.setRolloffFactor(1);
+    planeta.add(sound);
 });
 
-planeta.add(sound);
+// Estado inicial del sonido
+let isSoundOn = false;
 
-// configuracion del sonido a la distancia
-sound.setRefDistance(20); // Distancia a la que el sonido es más fuerte
-sound.setRolloffFactor(1); // Cómo decrece el volumen con la distancia
+// Botón de control de sonido
+const soundToggleButton = document.getElementById('sound-toggle');
+soundToggleButton.addEventListener('click', function() {
+    isSoundOn = !isSoundOn;
+    if (isSoundOn) {
+        sound.play();
+        this.classList.add('sound-on');
+        this.textContent = 'Sound Off';
+    } else {
+        sound.pause();
+        this.classList.remove('sound-on');
+        this.textContent = 'Sound On';
+    }
+});
 
 
 //posicion del planeta  
@@ -223,10 +238,11 @@ showPageContent(0);
 
 document.getElementById('start-journey').addEventListener('click', function() {
   this.style.display = 'none';
-  sound.play();
+
   currentPage = 1;
   showPageContent(currentPage);
   animateCameraToPosition(currentPage);
+  
   // Muestra los botones "Siguiente" y "Anterior"
   document.getElementById('nav-next').style.display = 'block';
   document.getElementById('nav-prev').style.display = 'block';
@@ -259,8 +275,7 @@ function resetToStartJourney() {
   showPageContent(currentPage);//muestra page0
   document.getElementById('nav-next').style.display = 'none';
   document.getElementById('nav-prev').style.display = 'none';
-  sound.pause();
-  sound.currentTime = 0;
+
   resetCameraToInitialPosition();
 }
 
